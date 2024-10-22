@@ -223,3 +223,38 @@ void mostrarPuntuacion(int puntuacion) {
     cout << "Puntuacion: " << puntuacion;
     setColor(7);   // Restaurar a blanco (el color por defecto)
 }
+
+void mostrarInstrucciones() {
+    mostrarTituloParpadeante();
+    setColor(11);  // Color cian brillante
+    dibujarMarco(85, 6);
+    
+    // Mostrar instrucciones centradas
+    cout << "\n\n\t\t     Bienvenido a Space Invaders!\n\n";
+    setColor(10); // Verde
+    cout << "\t\tInstrucciones del juego:\n";
+    setColor(15); // Blanco brillante
+    cout << "\t\t1. Usa las teclas [A] y [D] para mover la nave.\n";
+    cout << "\t\t2. Usa 'espacio' para disparar.\n";
+    cout << "\t\t3. Elimina a los invasores antes de que lleguen al final.\n";
+    cout << "\t\t4. ¡Evita los disparos enemigos!\n";
+    cout << "\t\t5. Juega en modo 1 jugador o computadora vs invasores.\n";
+    setColor(12); // Rojo
+    cout << "\n\t\tPresiona cualquier tecla para continuar...\n";
+    setColor(7);  // Restaurar color a blanco predeterminado
+    _getch();
+}
+
+int seleccionarModo() {
+    system("cls");
+    setColor(14); // Amarillo
+    dibujarMarco(80, 10);
+    setColor(15); // Blanco brillante
+    cout << "\n\n\t\tSelecciona el modo de juego:\n";
+    cout << "\t\t1. 1 jugador vs invasores.\n";
+    cout << "\t\t2. Computadora vs invasores.\n";
+    cout << "\t\tSelecciona 1 o 2: ";
+    char seleccion = _getch();
+    return seleccion == '2';
+}
+
