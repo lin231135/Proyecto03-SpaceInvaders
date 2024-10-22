@@ -1,13 +1,32 @@
-#include <iostream>
-#include <windows.h>
-#include <vector>
-#include <conio.h>
-#include <cstdlib>
-#include <pthread.h>
-#include <semaphore.h>
+/*
+*----------------------------------------
+* Proyecto3 - Space Invaders
+* ---------------------------------------
+* UNIVERSIDAD DEL VALLE DE GUATEMALA
+* CC3086 - Programacion de Microprocesadores
+* Autor: Dulce Ambrosio - 231143
+* Autor: Javier Linares - 231135
+* Autor: Marcos Ambrocio - 231140
+* Autor: Daniel Chet - 231177
+* Autor: Cindy Gualim - 21226
+* ---------------------------------------
+* Haciendo uso de pthreads y mutexes se 
+* realizó una version a consola del 
+* videojuego Space Invaders.
+*----------------------------------------
+*/
 
-using namespace std;
+#include <iostream> // Biblioteca para entrada y salida estándar
+#include <windows.h> // Biblioteca para funciones específicas de Windows
+#include <vector> // Biblioteca para utilizar vectores
+#include <conio.h> // Biblioteca para entrada de teclado
+#include <cstdlib> // Biblioteca para funciones generales como rand()
+#include <pthread.h> // Biblioteca para manejo de hilos
+#include <semaphore.h> // Biblioteca para manejo de semáforos
 
+using namespace std; // Para evitar escribir std:: antes de cada función de la biblioteca estándar
+
+// Declaraciones de funciones
 void gotoxy(int x, int y);
 void dibujarBordes(int x_min, int x_max, int y_min, int y_max);
 void dibujarNave(int x, int y);
@@ -21,29 +40,32 @@ void moverEnemigos(vector<pair<int, int>>& enemigos, int& direccion, int x_min, 
 bool colision(int x1, int y1, int x2, int y2);
 void mostrarPuntuacion(int puntuacion);
 
-pthread_mutex_t screen_mutex;
-sem_t invader_sem;
+// Variables globales para sincronización
+pthread_mutex_t screen_mutex; // Mutex para proteger la pantalla
+sem_t invader_sem; // Semáforo para controlar el movimiento de los invasores
 
+// Estructura para almacenar datos del juego
 struct GameData {
-    int x, y;
-    vector<pair<int, int>> balas;
-    vector<pair<int, int>> enemigos;
-    vector<pair<int, int>> disparosEnemigos;
-    int direccion;
-    int puntuacion;
-    bool jugadorMuerto;
-    bool modoComputadora;
-    int velocidadInvader;
-    int velocidadDisparosEnemigos;
-    bool FinalizarHilos; // Flag to terminate threads
+    int x, y; // Posición de la nave
+    vector<pair<int, int>> balas; // Vector de balas disparadas
+    vector<pair<int, int>> enemigos; // Vector de posiciones de enemigos
+    vector<pair<int, int>> disparosEnemigos; // Vector de disparos enemigos
+    int direccion; // Dirección de movimiento de los enemigos
+    int puntuacion; // Puntuación del jugador
+    bool jugadorMuerto; // Estado del jugador
+    bool modoComputadora; // Modo de juego (manual o automático)
+    int velocidadInvader; // Velocidad de los invasores
+    int velocidadDisparosEnemigos; // Velocidad de los disparos enemigos
+    bool FinalizarHilos; // Bandera para finalizar los hilos
 };
 
+// Función para manejar la entrada del jugador
 void* playerInput(void* arg) {
     GameData* data = (GameData*)arg;
     while (!data->jugadorMuerto && !data->FinalizarHilos) {
-        if (!data->modoComputadora && _kbhit()) {
-            char tecla = _getch();
-            pthread_mutex_lock(&screen_mutex);
+        if (!data->modoComputadora && _kbhit()) { // Si no está en modo automático y hay una tecla presionada
+            char tecla = _getch(); // Captura la tecla presionada
+            pthread_mutex_lock(&screen_mutex); // Bloquea el mutex para proteger la pantalla
             if (tecla == 'a' && data->x > 6) { // Mover a la izquierda con 'A'
                 borrarNave(data->x, data->y);
                 data->x--;
@@ -57,7 +79,7 @@ void* playerInput(void* arg) {
             if (tecla == ' ') { // Disparar
                 disparar(data->balas, data->x, data->y);
             }
-            pthread_mutex_unlock(&screen_mutex);
+            pthread_mutex_unlock(&screen_mutex); // Desbloquea el mutex
         }
         // Modo computadora
         if (data->modoComputadora) {
@@ -69,34 +91,37 @@ void* playerInput(void* arg) {
             if (rand() % 3 == 0) disparar(data->balas, data->x, data->y);
             pthread_mutex_unlock(&screen_mutex);
         }
-        Sleep(50);
+        Sleep(50); // Espera 50 ms
     }
     return NULL;
 }
 
+// Función para mover las balas
 void* moveBullets(void* arg) {
     GameData* data = (GameData*)arg;
     while (!data->jugadorMuerto && !data->FinalizarHilos) {
         pthread_mutex_lock(&screen_mutex);
         moverBalas(data->balas, data->enemigos, 5, data->puntuacion);
         pthread_mutex_unlock(&screen_mutex);
-        Sleep(100);
+        Sleep(100); // Espera 100 ms
     }
     return NULL;
 }
 
+// Función para mover los invasores
 void* moveInvaders(void* arg) {
     GameData* data = (GameData*)arg;
     while (!data->jugadorMuerto && !data->FinalizarHilos) {
-        sem_wait(&invader_sem);
+        sem_wait(&invader_sem); // Espera en el semáforo
         pthread_mutex_lock(&screen_mutex);
         moverEnemigos(data->enemigos, data->direccion, 5, 50, 20);
         pthread_mutex_unlock(&screen_mutex);
-        Sleep(data->velocidadInvader);  // Ajuste de velocidad con el nivel de dificultad
+        Sleep(data->velocidadInvader); // Ajuste de velocidad con el nivel de dificultad
     }
     return NULL;
 }
 
+// Función para disparar enemigos
 void* enemyFire(void* arg) {
     GameData* data = (GameData*)arg;
     while (!data->jugadorMuerto && !data->FinalizarHilos) {
@@ -104,16 +129,18 @@ void* enemyFire(void* arg) {
         dispararEnemigos(data->disparosEnemigos, data->enemigos);
         moverDisparosEnemigos(data->disparosEnemigos, data->x, data->y, data->jugadorMuerto);
         pthread_mutex_unlock(&screen_mutex);
-        Sleep(data->velocidadDisparosEnemigos);  // Ajuste de velocidad con el nivel de dificultad
+        Sleep(data->velocidadDisparosEnemigos); // Ajuste de velocidad con el nivel de dificultad
     }
     return NULL;
 }
 
+// Función para establecer el color de texto en la consola
 void setColor(int color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
 
+// Función para dibujar un marco en la consola
 void dibujarMarco(int ancho, int alto) {
     for (int i = 0; i < alto; i++) {
         for (int j = 0; j < ancho; j++) {
@@ -152,11 +179,11 @@ void mostrarTituloParpadeante() {
     setColor(7);
 }
 
+// Función para mostrar las instrucciones del juego
 void mostrarInstrucciones() {
     mostrarTituloParpadeante();
     setColor(11);  // Color cian brillante
     dibujarMarco(85, 6);
-    
     // Mostrar instrucciones centradas
     cout << "\n\n\t\t     Bienvenido a Space Invaders!\n\n";
     setColor(10); // Verde
@@ -173,6 +200,7 @@ void mostrarInstrucciones() {
     _getch();
 }
 
+// Función para seleccionar el modo de juego
 int seleccionarModo() {
     system("cls");
     setColor(14); // Amarillo
@@ -186,6 +214,7 @@ int seleccionarModo() {
     return seleccion == '2';
 }
 
+// Función para seleccionar la dificultad del juego
 void seleccionarDificultad(int &velocidadInvader, int &velocidadDisparosEnemigos) {
     system("cls");
     setColor(14); // Amarillo para el marco
@@ -234,6 +263,7 @@ void seleccionarDificultad(int &velocidadInvader, int &velocidadDisparosEnemigos
     }
 }
 
+// Función para mover el cursor a una posición específica en la consola
 void gotoxy(int x, int y) {
     HANDLE consola = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos;
@@ -242,6 +272,7 @@ void gotoxy(int x, int y) {
     SetConsoleCursorPosition(consola, pos);
 }
 
+// Función para dibujar los bordes del área de juego
 void dibujarBordes(int x_min, int x_max, int y_min, int y_max) {
     for (int x = x_min; x <= x_max; x++) {
         gotoxy(x, y_min - 1); cout << "░";
@@ -253,18 +284,22 @@ void dibujarBordes(int x_min, int x_max, int y_min, int y_max) {
     }
 }
 
+// Función para dibujar la nave en la posición especificada
 void dibujarNave(int x, int y) {
     gotoxy(x, y); cout << "🛦";
 }
 
+// Función para borrar la nave de la posición especificada
 void borrarNave(int x, int y) {
     gotoxy(x, y); cout << " ";
 }
 
+// Función para disparar balas desde la nave
 void disparar(vector<pair<int, int>>& balas, int x, int y) {
     balas.push_back({x, y - 1});
 }
 
+// Función para mover las balas y verificar colisiones
 void moverBalas(vector<pair<int, int>>& balas, vector<pair<int, int>>& enemigos, int y_min, int& puntuacion) {
     for (size_t i = 0; i < balas.size(); i++) {
         int x = balas[i].first;
@@ -289,6 +324,7 @@ void moverBalas(vector<pair<int, int>>& balas, vector<pair<int, int>>& enemigos,
     }
 }
 
+// Función para disparar desde los enemigos
 void dispararEnemigos(vector<pair<int, int>>& disparosEnemigos, vector<pair<int, int>>& enemigos) {
     if (!enemigos.empty()) {
         // Limitar el número de disparos activos
@@ -302,6 +338,7 @@ void dispararEnemigos(vector<pair<int, int>>& disparosEnemigos, vector<pair<int,
     }
 }
 
+// Función para mover los disparos enemigos y verificar colisiones
 void moverDisparosEnemigos(vector<pair<int, int>>& disparosEnemigos, int x, int y, bool& jugadorMuerto) {
     for (size_t i = 0; i < disparosEnemigos.size(); i++) {
         int ex = disparosEnemigos[i].first;
@@ -320,12 +357,14 @@ void moverDisparosEnemigos(vector<pair<int, int>>& disparosEnemigos, int x, int 
     }
 }
 
+// Función para dibujar los enemigos en sus posiciones actuales
 void dibujarEnemigos(vector<pair<int, int>>& enemigos) {
     for (auto& enemigo : enemigos) {
         gotoxy(enemigo.first, enemigo.second); cout << "M";
     }
 }
 
+// Función para mover los enemigos y cambiar de dirección si es necesario
 void moverEnemigos(vector<pair<int, int>>& enemigos, int& direccion, int x_min, int x_max, int y_max) {
     bool cambiarDireccion = false;
     for (auto& enemigo : enemigos) {
@@ -345,10 +384,12 @@ void moverEnemigos(vector<pair<int, int>>& enemigos, int& direccion, int x_min, 
     dibujarEnemigos(enemigos);
 }
 
+// Función para verificar colisiones entre dos objetos
 bool colision(int x1, int y1, int x2, int y2) {
     return (x1 == x2 && y1 == y2);
 }
 
+// Función para mostrar la puntuación en la pantalla
 void mostrarPuntuacion(int puntuacion) {
     setColor(10);  // 10 es el código para verde en la consola
     gotoxy(5, 2);  // Mostrar en una posición fija
@@ -356,8 +397,9 @@ void mostrarPuntuacion(int puntuacion) {
     setColor(7);   // Restaurar a blanco (el color por defecto)
 }
 
+// Función principal del juego
 int main() {
-    system("chcp 65001");
+    system("chcp 65001"); // Configurar la consola para UTF-8
     dibujarMarco(10, 5);
 
     while (true) {
@@ -368,8 +410,10 @@ int main() {
         int velocidadInvader, velocidadDisparosEnemigos;
         seleccionarDificultad(velocidadInvader, velocidadDisparosEnemigos);
 
+        // Inicializar datos del juego
         GameData data = {20, 19, {}, {{10, 7}, {15, 7}, {20, 7}, {25, 7}, {30, 7}, {35, 7}}, {}, 1, 0, false, modoComputadora, velocidadInvader, velocidadDisparosEnemigos, false};
 
+        // Crear hilos para manejar diferentes aspectos del juego
         pthread_t input_thread, bullet_thread, invader_thread, enemy_fire_thread;
         pthread_mutex_init(&screen_mutex, NULL);
         sem_init(&invader_sem, 0, 1);
