@@ -185,3 +185,36 @@ void moverEnemigos(vector<pair<int, int>>& enemigos, int& direccion, int x_min, 
     }
     dibujarEnemigos(enemigos);
 }
+
+void dispararEnemigos(vector<pair<int, int>>& disparosEnemigos, vector<pair<int, int>>& enemigos) {
+    if (!enemigos.empty()) {
+        // Limitar el número de disparos activos
+        if (disparosEnemigos.size() < 5) { // Limita a 5 disparos activos
+            // Aumentar el valor del módulo para reducir la frecuencia de disparo
+            if (rand() % 50 == 0) { // Cambia 50 a un número mayor para disparar menos frecuentemente
+                int index = rand() % enemigos.size();
+                disparosEnemigos.push_back({enemigos[index].first, enemigos[index].second + 1});
+            }
+        }
+    }
+}
+
+void moverDisparosEnemigos(vector<pair<int, int>>& disparosEnemigos, int x, int y, bool& jugadorMuerto) {
+    for (size_t i = 0; i < disparosEnemigos.size(); i++) {
+        int ex = disparosEnemigos[i].first;
+        int ey = disparosEnemigos[i].second;
+        gotoxy(ex, ey); cout << " ";
+        if (ey < 19) {
+            disparosEnemigos[i].second++;
+            gotoxy(ex, disparosEnemigos[i].second); cout << "!";
+        } else {
+            disparosEnemigos.erase(disparosEnemigos.begin() + i);
+            i--;
+        }
+        if (colision(ex, disparosEnemigos[i].second, x, y)) {
+            jugadorMuerto = true;
+        }
+    }
+}*
+
+
