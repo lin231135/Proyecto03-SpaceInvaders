@@ -85,3 +85,26 @@ void* moveInvaders(void* arg) {
     }
     return NULL;
 }
+
+void* moveBullets(void* arg) {
+    GameData* data = (GameData*)arg;
+    while (!data->jugadorMuerto) {
+        pthread_mutex_lock(&screen_mutex);
+        moverBalas(data->balas, data->enemigos, 5, data->puntuacion);
+        pthread_mutex_unlock(&screen_mutex);
+        Sleep(100);
+    }
+    return NULL;
+}
+
+void* enemyFire(void* arg) {
+GameData* data = (GameData*)arg;
+while (!data->jugadorMuerto) {
+    pthread_mutex_lock(&screen_mutex);
+    dispararEnemigos(data->disparosEnemigos, data->enemigos);
+    moverDisparosEnemigos(data->disparosEnemigos, data->x, data->y, data->jugadorMuerto);
+    pthread_mutex_unlock(&screen_mutex);
+    Sleep(data->velocidadDisparosEnemigos); // Ajuste de velocidad con el nivel de dificultad
+    }
+return NULL;
+}
