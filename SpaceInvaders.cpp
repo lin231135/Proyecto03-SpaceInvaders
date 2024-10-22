@@ -276,3 +276,28 @@ void dibujarMarco(int ancho, int alto) {
     }
 }
 
+void mostrarTituloParpadeante() {
+    string titulo = R"(
+   _____ ____  ___   ____________   _____   ___    _____    ____  __________  _____
+  / ___// __ \/   | / ____/ ____/  /  _/ | / / |  / /   |  / __ \/ ____/ __ \/ ___/
+  \__ \/ /_/ / /| |/ /   / __/     / //  |/ /| | / / /| | / / / / __/ / /_/ /\__ \ 
+ ___/ / ____/ ___ / /___/ /___   _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / 
+/____/_/   /_/  |_\____/_____/  /___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/   
+)";
+
+    int colores[] = {12, 14, 10, 11, 13}; // Colores: rojo, amarillo, verde, cian, púrpura
+    int numColores = sizeof(colores) / sizeof(colores[0]);
+
+    for (int i = 0; i < 10; i++) {  // Hace que el título parpadee 10 veces
+        setColor(colores[i % numColores]);
+        system("cls");
+        dibujarMarco(85, 6);
+        setColor(colores[i % numColores]);
+        cout << titulo << endl;
+        Sleep(200);  // Ajustar la velocidad del parpadeo para hacerlo más fluido
+    }
+
+    setColor(7);
+}
+
+
