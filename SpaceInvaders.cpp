@@ -258,3 +258,21 @@ int seleccionarModo() {
     return seleccion == '2';
 }
 
+void setColor(int color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+void dibujarMarco(int ancho, int alto) {
+    for (int i = 0; i < alto; i++) {
+        for (int j = 0; j < ancho; j++) {
+            if (i == 0 || i == alto - 1 || j == 0 || j == ancho - 1) {
+                cout << "#";  // Marco del menú
+            } else {
+                cout << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+
