@@ -215,6 +215,11 @@ void moverDisparosEnemigos(vector<pair<int, int>>& disparosEnemigos, int x, int 
             jugadorMuerto = true;
         }
     }
-}*
+}
 
-
+void mostrarPuntuacion(int puntuacion) {
+    setColor(10);  // 10 es el código para verde en la consola
+    gotoxy(5, 2);  // Mostrar en una posición fija
+    cout << "Puntuacion: " << puntuacion;
+    setColor(7);   // Restaurar a blanco (el color por defecto)
+}
