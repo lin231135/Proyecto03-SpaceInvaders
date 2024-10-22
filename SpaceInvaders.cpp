@@ -37,3 +37,39 @@ struct GameData {
     int velocidadDisparosEnemigos;
     bool FinalizarHilos; // Flag to terminate threads
 };
+
+void* playerInput(void* arg) {
+    GameData* data = (GameData*)arg;
+    while (!data->jugadorMuerto) {
+        if (!data->modoComputadora && _kbhit()) {
+            char tecla = _getch();
+            pthread_mutex_lock(&screen_mutex);
+            if (tecla == 'a' && data->x > 6) { // Mover a la izquierda con 'A'
+            borrarNave(data->x, data->y);
+            data->x--;
+            dibujarNave(data->x, data->y);
+        }
+        if (tecla == 'd' && data->x < 49) { // Mover a la derecha con 'D'
+            borrarNave(data->x, data->y);
+            data->x++;
+            dibujarNave(data->x, data->y);
+        }
+        if (tecla == ' ') { // Disparar
+            disparar(data->balas, data->x, data->y);
+        }
+            pthread_mutex_unlock(&screen_mutex);
+        }
+        // Modo computadora
+        if (data->modoComputadora) {
+            pthread_mutex_lock(&screen_mutex);
+            borrarNave(data->x, data->y);
+            if (data->x > 6 && rand() % 2 == 0) data->x--;
+            else if (data->x < 49) data->x++;
+            dibujarNave(data->x, data->y);
+            if (rand() % 3 == 0) disparar(data->balas, data->x, data->y);
+            pthread_mutex_unlock(&screen_mutex);
+        }
+        Sleep(50);
+    }
+    return NULL;
+}
