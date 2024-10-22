@@ -300,4 +300,50 @@ void mostrarTituloParpadeante() {
     setColor(7);
 }
 
+void seleccionarDificultad(int &velocidadInvader, int &velocidadDisparosEnemigos) {
+    system("cls");
+    setColor(14); // Amarillo para el marco
+    dibujarMarco(80, 12);
+    setColor(15); // Blanco brillante para el texto
+    cout << "\n\n\t\tSelecciona el nivel de dificultad:\n";
 
+    setColor(10); // Verde para 'Fácil'
+    cout << "\t\t1. Facil\n";
+
+    setColor(14); // Amarillo para 'Medio'
+    cout << "\t\t2. Medio\n";
+
+    setColor(12); // Rojo para 'Difícil'
+    cout << "\t\t3. Dificil\n";
+
+    setColor(13); // Púrpura para 'Lluvia de Fuego'
+    cout << "\t\t4. Lluvia de Fuego\n";
+
+    setColor(15); // Restaurar blanco para la entrada
+    cout << "\t\tSelecciona 1, 2, 3 o 4: ";
+    char seleccion = _getch();
+
+    // Asignar las velocidades en función de la dificultad seleccionada
+    switch (seleccion) {
+        case '1': // Facil
+            velocidadInvader = 1000;
+            velocidadDisparosEnemigos = 800;
+            break;
+        case '2': // Medio
+            velocidadInvader = 800;
+            velocidadDisparosEnemigos = 700;
+            break;
+        case '3': // Dificil
+            velocidadInvader = 500;
+            velocidadDisparosEnemigos = 100;
+            break;
+        case '4': // Lluvia de Fuego
+            velocidadInvader = 100;
+            velocidadDisparosEnemigos = 50;
+            break;
+        default:
+            velocidadInvader = 1000;
+            velocidadDisparosEnemigos = 800;
+            break;
+    }
+}
