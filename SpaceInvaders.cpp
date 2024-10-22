@@ -73,3 +73,15 @@ void* playerInput(void* arg) {
     }
     return NULL;
 }
+
+void* moveInvaders(void* arg) {
+    GameData* data = (GameData*)arg;
+    while (!data->jugadorMuerto) {
+        sem_wait(&invader_sem);
+        pthread_mutex_lock(&screen_mutex);
+        moverEnemigos(data->enemigos, data->direccion, 5, 50, 20);
+        pthread_mutex_unlock(&screen_mutex);
+        Sleep(data->velocidadInvader);  // Ajuste de velocidad con el nivel de dificultad
+    }
+    return NULL;
+}
