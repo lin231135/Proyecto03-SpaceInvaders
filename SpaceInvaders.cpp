@@ -347,3 +347,11 @@ void seleccionarDificultad(int &velocidadInvader, int &velocidadDisparosEnemigos
             break;
     }
 }
+
+void gotoxy(int x, int y) {
+    HANDLE consola = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD pos;
+    pos.X = x;
+    pos.Y = y;
+    SetConsoleCursorPosition(consola, pos);
+}
