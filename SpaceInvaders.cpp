@@ -137,3 +137,51 @@ void moverBalas(vector<pair<int, int>>& balas, vector<pair<int, int>>& enemigos,
 bool colision(int x1, int y1, int x2, int y2) {
     return (x1 == x2 && y1 == y2);
 }
+
+void dibujarBordes(int x_min, int x_max, int y_min, int y_max) {
+    for (int x = x_min; x <= x_max; x++) {
+        gotoxy(x, y_min - 1); cout << "░";
+        gotoxy(x, y_max); cout << "░";
+    }
+    for (int y = y_min; y <= y_max; y++) {
+        gotoxy(x_min, y); cout << "░";
+        gotoxy(x_max, y); cout << "░";
+    }
+}
+
+void dibujarNave(int x, int y) {
+    gotoxy(x, y); cout << "🛦";
+}
+
+void borrarNave(int x, int y) {
+    gotoxy(x, y); cout << " ";
+}
+
+void disparar(vector<pair<int, int>>& balas, int x, int y) {
+    balas.push_back({x, y - 1});
+}
+
+void dibujarEnemigos(vector<pair<int, int>>& enemigos) {
+    for (auto& enemigo : enemigos) {
+        gotoxy(enemigo.first, enemigo.second); cout << "M";
+    }
+}
+
+void moverEnemigos(vector<pair<int, int>>& enemigos, int& direccion, int x_min, int x_max, int y_max) {
+    bool cambiarDireccion = false;
+    for (auto& enemigo : enemigos) {
+        gotoxy(enemigo.first, enemigo.second); cout << " ";
+        enemigo.first += direccion;
+        if (enemigo.first <= x_min+1 || enemigo.first >= x_max-1) {
+            cambiarDireccion = true;
+        }
+    }
+    if (cambiarDireccion) {
+        direccion = -direccion;
+        for (auto& enemigo : enemigos) {
+            enemigo.second++;
+            if (enemigo.second >= y_max) return;
+        }
+    }
+    dibujarEnemigos(enemigos);
+}
