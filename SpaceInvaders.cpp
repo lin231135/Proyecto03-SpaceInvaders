@@ -108,3 +108,32 @@ while (!data->jugadorMuerto) {
     }
 return NULL;
 }
+
+void moverBalas(vector<pair<int, int>>& balas, vector<pair<int, int>>& enemigos, int y_min, int& puntuacion) {
+    for (size_t i = 0; i < balas.size(); i++) {
+        int x = balas[i].first;
+        int y = balas[i].second;
+        gotoxy(x, y); cout << " ";
+        if (y > y_min) {
+            balas[i].second--;
+            gotoxy(x, balas[i].second); cout << " ▲ ";
+        } else {
+            balas.erase(balas.begin() + i);
+            i--;
+        }
+
+        for (size_t j = 0; j < enemigos.size(); j++) {
+            if (colision(x, balas[i].second, enemigos[j].first, enemigos[j].second)) {
+                gotoxy(enemigos[j].first, enemigos[j].second); cout << " ";
+                enemigos.erase(enemigos.begin() + j);
+                puntuacion += 10;
+                mostrarPuntuacion(puntuacion);
+                break;
+            }
+        }
+    }
+}
+
+bool colision(int x1, int y1, int x2, int y2) {
+    return (x1 == x2 && y1 == y2);
+}
