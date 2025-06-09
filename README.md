@@ -1,7 +1,7 @@
 # Space Invaders
 
-![Space Invaders](![image](https://github.com/user-attachments/assets/e21e80f8-9e25-47a2-8163-c9143b59324a))
-![image](https://github.com/user-attachments/assets/a2c96152-4769-41f7-aef5-c9245648a78f)
+![image1](https://github.com/user-attachments/assets/e21e80f8-9e25-47a2-8163-c9143b59324a)
+![image2](https://github.com/user-attachments/assets/a2c96152-4769-41f7-aef5-c9245648a78f)
 
 
 ## Descripción
